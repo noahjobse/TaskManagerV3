@@ -1,0 +1,137 @@
+@startuml 
+class User {
+    -userId: int
+    -userName: String
+    -password: String
+    -userRole: String
+    -tasks: Set<TaskEntity>
+    +isAdmin(): boolean
+    +getRole(): String
+}
+
+class TaskEntity {
+    -taskId: int
+    -taskName: String
+    -description: String
+    -dueDate: Date
+    -status: String
+    -user: User
+    -categories: Set<Category>
+    -reminders: Set<Reminder>
+    +markComplete(): void
+    +updatePriority(priority: String): void
+}
+
+class Category {
+    -categoryId: int
+    -categoryName: String
+    -tasks: Set<TaskEntity>
+    +renameCategory(newName: String): void
+    +addTask(task: TaskEntity): void
+    +removeTask(task: TaskEntity): void
+}
+
+class Reminder {
+    -reminderId: int
+    -reminderDateTime: Date
+    -isComplete: boolean
+    -recurring: boolean
+    -repeatFrequency: String
+    -task: TaskEntity
+    +triggerNotification(): void
+    +markComplete(): void
+    +setRecurring(frequency: String): void
+    +clearRecurring(): void
+}
+
+class UserService {
+    +registerUser(user: User): void
+    +authenticateUser(username: String, password: String): boolean
+}
+
+class TaskService {
+    +createTask(task: TaskEntity): void
+    +getAllTasks(): List<TaskEntity>
+    +updateTask(taskId: int, task: TaskEntity): void
+    +deleteTask(taskId: int): void
+}
+
+class CategoryService {
+    +createCategory(category: Category): void
+    +getAllCategories(): List<Category>
+    +updateCategory(categoryId: int, category: Category): void
+    +deleteCategory(categoryId: int): void
+}
+
+class ReminderService {
+    +createReminder(reminder: Reminder): void
+    +getAllReminders(): List<Reminder>
+    +updateReminder(reminderId: int, reminder: Reminder): void
+    +deleteReminder(reminderId: int): void
+    +assignReminderToTask(reminderId: int, taskId: int): void
+}
+
+interface UserRepository {
+    +save(user: User): void
+    +findByUserName(userName: String): User
+}
+
+interface TaskRepository {
+    +save(task: TaskEntity): void
+    +findAll(): List<TaskEntity>
+    +findById(taskId: int): TaskEntity
+    +deleteById(taskId: int): void
+}
+
+interface CategoryRepository {
+    +save(category: Category): void
+    +findAll(): List<Category>
+    +findById(categoryId: int): Category
+    +deleteById(categoryId: int): void
+}
+
+interface ReminderRepository {
+    +save(reminder: Reminder): void
+    +findAll(): List<Reminder>
+    +findById(reminderId: int): Reminder
+    +deleteById(reminderId: int): void
+}
+
+class ConsoleMenu {
+    +start(): void
+    -registerUser(scanner: Scanner): void
+    -loginUser(scanner: Scanner): void
+    -updateUser(scanner: Scanner): void
+    -logoutUser(): void
+    -createTask(scanner: Scanner): void
+    -viewTasks(): void
+    -updateTask(scanner: Scanner): void
+    -deleteTask(scanner: Scanner): void
+    -assignCategoryToTask(scanner: Scanner): void
+    -createCategory(scanner: Scanner): void
+    -viewCategories(): void
+    -updateCategory(scanner: Scanner): void
+    -deleteCategory(scanner: Scanner): void
+    -createReminder(scanner: Scanner): void
+    -viewReminders(): void
+    -updateReminder(scanner: Scanner): void
+    -deleteReminder(scanner: Scanner): void
+    -setReminderFrequency(scanner: Scanner): void
+    -sendReminderNotifications(): void
+    -assignReminderToTask(scanner: Scanner): void
+}
+
+ConsoleMenu --> UserService : "Handles User Operations"
+ConsoleMenu --> TaskService : "Handles Task Operations"
+ConsoleMenu --> CategoryService : "Handles Category Operations"
+ConsoleMenu --> ReminderService : "Handles Reminder Operations"
+
+UserService --> UserRepository : "Save/Find User"
+TaskService --> TaskRepository : "Save/Delete Task"
+CategoryService --> CategoryRepository : "Save/Delete Category"
+ReminderService --> ReminderRepository : "Save/Delete Reminder"
+
+TaskEntity --> User : "Belongs to"
+TaskEntity --> Category : "Has categories"
+TaskEntity --> Reminder : "Has reminders"
+@enduml
