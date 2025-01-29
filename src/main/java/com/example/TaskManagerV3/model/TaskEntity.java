@@ -30,6 +30,11 @@ public class TaskEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false) // Enforce non-null
+    private Category category;
+
+
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reminder> reminders = new ArrayList<>();
 
@@ -37,13 +42,14 @@ public class TaskEntity {
 
     public TaskEntity() {}
 
-    public TaskEntity(Long taskId, String taskName, String description, String status, LocalDateTime dueDate, User user) {
+    public TaskEntity(Long taskId, String taskName, String description, String status, LocalDateTime dueDate, User user, Category category) {
         this.taskId = taskId;
         this.taskName = taskName;
         this.description = description;
         this.status = status;
         this.dueDate = dueDate;
         this.user = user;
+        this.category = category;
     }
 
     public Long getTaskId() {
@@ -92,6 +98,14 @@ public class TaskEntity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public List<Reminder> getReminders() {

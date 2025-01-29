@@ -1,7 +1,9 @@
 package com.example.TaskManagerV3.menu;
 
+import com.example.TaskManagerV3.model.Category;
 import com.example.TaskManagerV3.model.TaskEntity;
 import com.example.TaskManagerV3.model.User;
+import com.example.TaskManagerV3.service.CategoryService;
 import com.example.TaskManagerV3.service.TaskService;
 import com.example.TaskManagerV3.service.UserService;
 import org.springframework.stereotype.Component;
@@ -15,15 +17,15 @@ public class Menu {
 
     private final TaskService taskService;
     private final UserService userService;
+    private final CategoryService categoryService;
     private User loggedInUser;
 
-    // Constructor to inject TaskService and UserService
-    public Menu(TaskService taskService, UserService userService) {
+    public Menu(TaskService taskService, UserService userService, CategoryService categoryService) {
         this.taskService = taskService;
         this.userService = userService;
+        this.categoryService = categoryService;
     }
 
-    // Main method to start the menu
     public void start() {
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
@@ -42,7 +44,6 @@ public class Menu {
         scanner.close();
     }
 
-    // Display the login menu options
     private void displayLoginMenu() {
         System.out.println("\n=== Login Menu ===");
         System.out.println("1. Register");
@@ -50,17 +51,14 @@ public class Menu {
         System.out.println("3. Exit");
     }
 
-    // Display the main menu options
     private void displayMainMenu() {
         System.out.println("\n=== Main Menu ===");
         System.out.println("1. Create Task");
-        System.out.println("2. Update Task");
-        System.out.println("3. View My Tasks");
-        System.out.println("4. Delete Task");
-        System.out.println("5. Logout");
+        System.out.println("2. View My Tasks");
+        System.out.println("3. Manage Categories");
+        System.out.println("4. Logout");
     }
 
-    // Handle the login menu options
     private boolean handleLoginOption(int option, Scanner scanner) {
         switch (option) {
             case 1 -> registerUser(scanner);
@@ -74,14 +72,12 @@ public class Menu {
         return true;
     }
 
-    // Handle the main menu options
     private boolean handleMainOption(int option, Scanner scanner) {
         switch (option) {
             case 1 -> createTask(scanner);
-            case 2 -> updateTask(scanner);
-            case 3 -> viewTasks();
-            case 4 -> deleteTask(scanner);
-            case 5 -> {
+            case 2 -> viewTasks();
+            case 3 -> manageCategories(scanner);
+            case 4 -> {
                 loggedInUser = null;
                 System.out.println("Logged out successfully.");
             }
@@ -90,7 +86,6 @@ public class Menu {
         return true;
     }
 
-    // Login a user
     private void login(Scanner scanner) {
         System.out.print("Enter username: ");
         String username = scanner.nextLine();
@@ -105,22 +100,6 @@ public class Menu {
         }
     }
 
-    // Register a new user
-    private void registerUser(Scanner scanner) {
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
-        System.out.print("Enter password: ");
-        String password = scanner.nextLine();
-
-        try {
-            User newUser = new User(null, username, password, "User");
-            userService.registerUser(newUser);
-            System.out.println("Registration successful! You can now log in.");
-        } catch (RuntimeException e) {
-            System.out.println("Error registering user: " + e.getMessage());
-        }
-    }
-
     private void createTask(Scanner scanner) {
         if (loggedInUser == null) {
             System.out.println("You must log in first!");
@@ -131,73 +110,34 @@ public class Menu {
         String taskName = scanner.nextLine();
         System.out.print("Enter description: ");
         String description = scanner.nextLine();
-        System.out.print("Enter due date (yyyy-MM-dd HH:mm): ");
-        String dueDateInput = scanner.nextLine();
 
-        try {
-            // Parse the due date string to LocalDateTime
-            LocalDateTime dueDate = LocalDateTime.parse(dueDateInput.replace(" ", "T"));
-
-            // Create a new TaskEntity object
-            TaskEntity task = new TaskEntity(null, taskName, description, "Pending", dueDate, loggedInUser);
-
-            // Save the task
-            taskService.createOrUpdateTask(task);
-
-            System.out.println("Task created successfully!");
-        } catch (RuntimeException e) {
-            System.out.println("Error creating task: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Invalid due date format! Please use 'yyyy-MM-dd HH:mm'.");
-        }
-    }
-
-
-    private void updateTask(Scanner scanner) {
-        if (loggedInUser == null) {
-            System.out.println("You must log in first!");
+        List<Category> categories = categoryService.getAllCategories();
+        if (categories.isEmpty()) {
+            System.out.println("No categories available. Please create a category first.");
             return;
         }
 
-        System.out.print("Enter task ID to update: ");
-        Long taskId = scanner.nextLong();
-        scanner.nextLine(); // Consume newline
-        System.out.print("Enter new task name: ");
-        String taskName = scanner.nextLine();
-        System.out.print("Enter new description: ");
-        String description = scanner.nextLine();
-        System.out.print("Enter new due date (yyyy-MM-dd HH:mm): ");
-        String dueDateInput = scanner.nextLine();
-        System.out.print("Enter new status (Pending/In Progress/Completed): ");
-        String status = scanner.nextLine();
+        System.out.println("Select a category:");
+        for (int i = 0; i < categories.size(); i++) {
+            System.out.println((i + 1) + ". " + categories.get(i).getCategoryName());
+        }
+        int categoryIndex = getUserOption(scanner) - 1;
+        if (categoryIndex < 0 || categoryIndex >= categories.size()) {
+            System.out.println("Invalid category selection.");
+            return;
+        }
+        Category selectedCategory = categories.get(categoryIndex);
 
         try {
-            // Retrieve the existing task by ID
-            TaskEntity task = taskService.getTaskById(taskId);
-
-            // Update task properties
-            task.setTaskName(taskName);
-            task.setDescription(description);
-
-            // Parse and set the due date
-            LocalDateTime dueDate = LocalDateTime.parse(dueDateInput.replace(" ", "T"));
-            task.setDueDate(dueDate);
-
-            task.setStatus(status);
-
-            // Save the updated task
+            LocalDateTime dueDate = LocalDateTime.now().plusDays(7);
+            TaskEntity task = new TaskEntity(null, taskName, description, "Pending", dueDate, loggedInUser, selectedCategory);
             taskService.createOrUpdateTask(task);
-
-            System.out.println("Task updated successfully!");
+            System.out.println("Task created successfully!");
         } catch (RuntimeException e) {
-            System.out.println("Error updating task: " + e.getMessage());
-        } catch (Exception e) {
-            System.out.println("Invalid due date format! Please use 'yyyy-MM-dd HH:mm'.");
+            System.out.println("Error creating task: " + e.getMessage());
         }
     }
 
-
-    // View tasks of the logged-in user
     private void viewTasks() {
         if (loggedInUser == null) {
             System.out.println("Please log in first.");
@@ -211,12 +151,11 @@ public class Menu {
             } else {
                 System.out.println("\n=== Your Tasks ===");
                 tasks.forEach(task -> System.out.printf(
-                        "Task ID: %d | Task: %s | Description: %s | Due Date: %s | Status: %s%n",
-                        task.getTaskId(),
+                        "Task: %s | Description: %s | Status: %s | Category: %s%n",
                         task.getTaskName(),
                         task.getDescription(),
-                        task.getDueDate(),
-                        task.getStatus()
+                        task.getStatus(),
+                        (task.getCategory() != null) ? task.getCategory().getCategoryName() : "Uncategorized"
                 ));
             }
         } catch (RuntimeException e) {
@@ -224,35 +163,79 @@ public class Menu {
         }
     }
 
-    // Delete a task
-    private void deleteTask(Scanner scanner) {
-        if (loggedInUser == null) {
-            System.out.println("You must log in first!");
-            return;
-        }
+    private void manageCategories(Scanner scanner) {
+        System.out.println("\n=== Manage Categories ===");
+        System.out.println("1. Create Category");
+        System.out.println("2. View Categories");
+        System.out.println("3. Back to Main Menu");
 
-        System.out.print("Enter task ID to delete: ");
-        Long taskId = scanner.nextLong();
-
-        try {
-            taskService.deleteTaskById(taskId);
-            System.out.println("Task deleted successfully!");
-        } catch (RuntimeException e) {
-            System.out.println("Error deleting task: " + e.getMessage());
+        int option = getUserOption(scanner);
+        switch (option) {
+            case 1 -> createCategory(scanner);
+            case 2 -> viewCategories();
+            case 3 -> {}
+            default -> System.out.println("Invalid option!");
         }
     }
 
-    // Get user option from the scanner
-    private int getUserOption(Scanner scanner) {
-        System.out.print("Enter your choice: ");
-        int option = -1;
+    private void createCategory(Scanner scanner) {
+        System.out.print("Enter category name: ");
+        String categoryName = scanner.nextLine();
+
         try {
-            option = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
-        } catch (Exception e) {
-            System.out.println("Invalid input! Please enter a number.");
-            scanner.nextLine(); // Clear invalid input
+            Category category = new Category(null, categoryName);
+            categoryService.createOrUpdateCategory(category);
+            System.out.println("Category created successfully!");
+        } catch (RuntimeException e) {
+            System.out.println("Error creating category: " + e.getMessage());
         }
-        return option;
+    }
+
+    private void viewCategories() {
+        try {
+            List<Category> categories = categoryService.getAllCategories();
+            if (categories.isEmpty()) {
+                System.out.println("No categories found.");
+            } else {
+                System.out.println("\n=== Categories ===");
+                categories.forEach(category -> System.out.println("Category: " + category.getCategoryName()));
+            }
+        } catch (RuntimeException e) {
+            System.out.println("Error retrieving categories: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Ensures the user enters a valid numeric choice.
+     */
+    private int getUserOption(Scanner scanner) {
+        int option;
+        while (true) {
+            System.out.print("Enter your choice: ");
+            try {
+                option = Integer.parseInt(scanner.nextLine().trim());
+                return option;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input! Please enter a valid number.");
+            }
+        }
+    }
+
+    /**
+     * Registers a new user by asking for username and password.
+     */
+    private void registerUser(Scanner scanner) {
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+
+        try {
+            User newUser = new User(null, username, password, "User");
+            userService.registerUser(newUser);
+            System.out.println("Registration successful! You can now log in.");
+        } catch (RuntimeException e) {
+            System.out.println("Error registering user: " + e.getMessage());
+        }
     }
 }

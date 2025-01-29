@@ -10,7 +10,7 @@ public class Reminder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reminder_id")
-    private int reminderId;
+    private Long reminderId;
 
     @Column(name = "reminder_date_time", nullable = false)
     private Date reminderDateTime;
@@ -31,7 +31,7 @@ public class Reminder {
     public Reminder() {
     }
 
-    public Reminder(int reminderId, Date reminderDateTime, TaskEntity task) {
+    public Reminder(Long reminderId, Date reminderDateTime, TaskEntity task) {
         this.reminderId = reminderId;
         this.reminderDateTime = reminderDateTime;
         this.task = task;
@@ -41,7 +41,7 @@ public class Reminder {
 
     // Getters and methods
 
-    public int getReminderId() {
+    public Long getReminderId() {
         return reminderId;
     }
 
