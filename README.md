@@ -98,7 +98,7 @@ The console application serves as a testing and development environment for the 
 
 ## Planned Features
 ### Frontend
-- **React with Vite**:
+- **React with create-react-app**:
   - User-friendly web interface for task management, reminders, and analytics.
   - Mobile responsiveness and integration with backend APIs.
 
