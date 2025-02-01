@@ -15,25 +15,20 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-
+    // CREATE: Register a new user
     public void registerUser(User user) {
-        // Check if the username already exists
         if (userRepository.existsByUserName(user.getUserName())) {
             throw new RuntimeException("User already exists!");
         }
-        // Check for empty or null password
         if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
             throw new RuntimeException("Password cannot be empty!");
         }
-        // Save the user
         userRepository.save(user);
     }
 
-
+    // READ: Authenticate and retrieve a user by username and password
     public User authenticate(String username, String password) {
         Optional<User> optionalUser = userRepository.findByUserName(username);
-
-        // Verify username exists and password matches
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.getPassword().equals(password)) {
@@ -43,7 +38,21 @@ public class UserService {
         throw new RuntimeException("Invalid username or password!");
     }
 
+    // READ: Retrieve a user by their username
+    public User getUserByUserName(String username) {
+        return userRepository.findByUserName(username)
+                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+    }
 
+    // UPDATE: Update an existing user (for example, change password or other details)
+    public User updateUser(User user) {
+        if (user.getUserId() == null || !userRepository.existsById(user.getUserId())) {
+            throw new RuntimeException("User not found with ID: " + user.getUserId());
+        }
+        return userRepository.save(user);
+    }
+
+    // DELETE: Delete a user by username
     public void deleteUser(String username) {
         Optional<User> optionalUser = userRepository.findByUserName(username);
         if (optionalUser.isEmpty()) {

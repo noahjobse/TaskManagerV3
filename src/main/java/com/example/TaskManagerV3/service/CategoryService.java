@@ -5,7 +5,6 @@ import com.example.TaskManagerV3.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Scanner;
 
 @Service
 public class CategoryService {
@@ -15,33 +14,30 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    // READ: Retrieve all categories
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
 
-    @SuppressWarnings("UnusedReturnValue")
-    public Category createOrUpdateCategory(Category category) {
+    // CREATE: Create a new category
+    public Category createCategory(Category category) {
         return categoryRepository.save(category);
     }
 
-    public void deleteCategoryById(long id) { // Match long type with Category model
+    // UPDATE: Update an existing category
+    public Category updateCategory(Category category) {
+        if (category.getCategoryId() == null || !categoryRepository.existsById(category.getCategoryId())) {
+            throw new RuntimeException("Category not found with ID: " + category.getCategoryId());
+        }
+        return categoryRepository.save(category);
+    }
+
+    // DELETE: Delete a category by ID
+    public void deleteCategory(long id) {
         if (categoryRepository.existsById(id)) {
             categoryRepository.deleteById(id);
         } else {
             throw new RuntimeException("Category not found with ID: " + id);
-        }
-    }
-
-    private void deleteCategory(Scanner scanner) {
-        System.out.print("Enter category ID to delete: ");
-        long categoryId = scanner.nextLong(); // Match long type with Category model
-        scanner.nextLine(); // Consume newline
-
-        try {
-            this.deleteCategoryById(categoryId);
-            System.out.println("Category deleted successfully!");
-        } catch (RuntimeException e) {
-            System.out.println("Error deleting category: " + e.getMessage());
         }
     }
 }

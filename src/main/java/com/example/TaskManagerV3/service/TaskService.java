@@ -17,23 +17,15 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    // Create or Update a Task
-    public TaskEntity createOrUpdateTask(TaskEntity task) {
-        if (task.getCategory() == null) {
-            throw new RuntimeException("Task must have a valid category assigned.");
-        }
-        return taskRepository.save(task);
+// CREATE: Create a new task
+public TaskEntity createTask(TaskEntity task) {
+    if (task.getCategory() == null) {
+        throw new RuntimeException("Task must have a valid category assigned.");
     }
+    return taskRepository.save(task);
+}
 
-    // Get All Tasks
-    @Transactional(readOnly = true)
-    public Iterable<TaskEntity> getAllTasks() {
-        Iterable<TaskEntity> tasks = taskRepository.findAll();
-        tasks.forEach(this::initializeCategory);
-        return tasks;
-    }
-
-    // Get All Tasks by User ID
+    // READ: Retrieve all tasks by user ID
     @Transactional(readOnly = true)
     public List<TaskEntity> getAllTasksByUser(Long userId) {
         List<TaskEntity> tasks = taskRepository.findByUser_UserId(userId);
@@ -41,7 +33,7 @@ public class TaskService {
         return tasks;
     }
 
-    // Get Task by ID
+    // READ: Retrieve a task by its ID
     @Transactional(readOnly = true)
     public TaskEntity getTaskById(Long id) {
         TaskEntity task = taskRepository.findById(id)
@@ -49,7 +41,22 @@ public class TaskService {
         return initializeCategory(task);
     }
 
-    // Delete Task by ID
+    // UPDATE: Update an existing task (alias for createOrUpdateTask)
+    public TaskEntity updateTask(TaskEntity task) {
+        if (task.getTaskId() == null || !taskRepository.existsById(task.getTaskId())) {
+            throw new RuntimeException("Task not found with ID: " + task.getTaskId());
+        }
+        return taskRepository.save(task);
+    }
+
+    // READ: Retrieve a task with its reminders by its ID
+    @Transactional
+    public TaskEntity getTaskWithReminders(Long taskId) {
+        return taskRepository.findTaskWithReminders(taskId)
+                .orElseThrow(() -> new RuntimeException("Task not found"));
+    }
+
+    // DELETE: Delete a task by its ID
     public void deleteTaskById(Long id) {
         if (taskRepository.existsById(id)) {
             taskRepository.deleteById(id);
@@ -58,33 +65,10 @@ public class TaskService {
         }
     }
 
-    // Check if Task Exists by ID
-    @Transactional(readOnly = true)
-    public boolean existsById(Long id) {
-        return taskRepository.existsById(id);
-    }
-
-    // Find Tasks by Status (Custom Query Example)
-    @Transactional(readOnly = true)
-    public Iterable<TaskEntity> findTasksByStatus(String status) {
-        Iterable<TaskEntity> tasks = taskRepository.findByStatus(status);
-        tasks.forEach(this::initializeCategory);
-        return tasks;
-    }
-
-    // Find Tasks by User ID (Custom Query Example)
-    @Transactional(readOnly = true)
-    public Iterable<TaskEntity> findTasksByUserId(Long userId) {
-        Iterable<TaskEntity> tasks = taskRepository.findByUser_UserId(userId);
-        tasks.forEach(this::initializeCategory);
-        return tasks;
-    }
-
-    // Initialize the category to prevent LazyInitializationException
+    // Helper method to initialize the category to prevent LazyInitializationException
     private TaskEntity initializeCategory(TaskEntity task) {
         if (task.getCategory() != null) {
-            // Explicitly accessing a property on the category to force initialization
-            task.getCategory().getCategoryName();
+            task.getCategory().getCategoryName(); // Force initialization of lazy property
         } else {
             System.out.println("Warning: Task ID " + task.getTaskId() + " has no category assigned.");
         }

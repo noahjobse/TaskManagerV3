@@ -49,6 +49,10 @@ public class Reminder {
         return reminderDateTime;
     }
 
+    public void setReminderDateTime(Date reminderDateTime) {
+        this.reminderDateTime = reminderDateTime;
+    }
+
     public boolean isComplete() {
         return isComplete;
     }
