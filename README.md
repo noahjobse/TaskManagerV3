@@ -57,7 +57,7 @@ The console application serves as a testing and development environment for the 
 
 ### Functionality
 - **Menu System**:
-  - Navigable menu to perform operations on tasks, categories, reminders, and notifications.
+  - Navigable mainMenu to perform operations on tasks, categories, reminders, and notifications.
 - **Testing Features**:
   - Console commands to validate business logic, database interactions, and service/controller functionality.
 - **User Interaction**:
@@ -92,7 +92,7 @@ The console application serves as a testing and development environment for the 
    ```
 
 4. **Follow Console Prompts**:
-   - Use the menu system to interact with tasks, categories, and reminders.
+   - Use the mainMenu system to interact with tasks, categories, and reminders.
 
 ---
 
