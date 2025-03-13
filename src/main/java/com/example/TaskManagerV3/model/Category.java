@@ -25,6 +25,9 @@ public class Category {
         this.categoryId = categoryId;
         this.categoryName = categoryName;
     }
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     public Long getCategoryId() {
         return categoryId;

@@ -14,11 +14,6 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    // READ: Retrieve all categories
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
-    }
-
     // CREATE: Create a new category
     public Category createCategory(Category category) {
         return categoryRepository.save(category);
@@ -39,5 +34,10 @@ public class CategoryService {
         } else {
             throw new RuntimeException("Category not found with ID: " + id);
         }
+    }
+
+    // READ: Retrieve all categories
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
     }
 }

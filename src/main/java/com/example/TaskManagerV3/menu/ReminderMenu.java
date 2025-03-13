@@ -23,22 +23,27 @@ public class ReminderMenu {
     }
 
     public void display(Scanner scanner) {
-        System.out.println("\n=== Manage Reminders ===");
-        System.out.println("1. Add Reminder");
-        System.out.println("2. View Reminders");
-        System.out.println("3. Mark Reminder as Complete");
-        System.out.println("4. Back to Main Menu");
-        int choice = loginMenu.getUserOption(scanner);
-        switch (choice) {
-            case 1 -> addReminder(scanner);
-            case 2 -> viewReminders();
-            case 3 -> markReminderComplete(scanner);
-            case 4 -> { /* return to main menu */ }
-            default -> System.out.println("Invalid option!");
+        boolean inReminderMenu = true;
+        while (inReminderMenu) {
+            System.out.println("\n=== Manage Reminders ===");
+            System.out.println("1. Create Reminder");
+            System.out.println("2. View Reminders");
+            System.out.println("3. Mark Reminder as Complete");
+            System.out.println("4. Delete Reminder");
+            System.out.println("5. Back to Main Menu");
+            int choice = loginMenu.getUserOption(scanner);
+            switch (choice) {
+                case 1 -> createReminder(scanner);
+                case 2 -> viewReminders();
+                case 3 -> markReminderComplete(scanner);
+                case 4 -> deleteReminder(scanner);
+                case 5 -> inReminderMenu = false;
+                default -> System.out.println("Invalid option!");
+            }
         }
     }
 
-    private void addReminder(Scanner scanner) {
+    private void createReminder(Scanner scanner) {
         System.out.print("Enter Task ID for the reminder: ");
         int taskId = loginMenu.getUserOption(scanner);
         TaskEntity task = taskService.getTaskById((long) taskId);
@@ -46,11 +51,11 @@ public class ReminderMenu {
             System.out.println("Task not found!");
             return;
         }
-        // For simplicity, assume current date/time or implement custom parsing
-        Date reminderDateTime = new Date(); // Replace with actual date parsing if needed
+        // Using current date/time for simplicity
+        Date reminderDateTime = new Date();
         Reminder reminder = new Reminder(null, reminderDateTime, task);
         reminderService.createReminder(reminder);
-        System.out.println("Reminder added successfully!");
+        System.out.println("Reminder created successfully!");
     }
 
     private void viewReminders() {
@@ -69,5 +74,12 @@ public class ReminderMenu {
         int reminderId = loginMenu.getUserOption(scanner);
         reminderService.markReminderComplete((long) reminderId);
         System.out.println("Reminder marked as complete.");
+    }
+
+    private void deleteReminder(Scanner scanner) {
+        System.out.print("Enter Reminder ID to delete: ");
+        int reminderId = loginMenu.getUserOption(scanner);
+        reminderService.deleteReminder((long) reminderId);
+        System.out.println("Reminder deleted successfully!");
     }
 }

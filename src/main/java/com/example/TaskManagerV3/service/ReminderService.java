@@ -14,48 +14,34 @@ public class ReminderService {
         this.reminderRepository = reminderRepository;
     }
 
-    // CREATE: Create a new reminder
-    public void createReminder(Reminder reminder) {
-        reminderRepository.save(reminder);
+    // CREATE: Save a new reminder
+    public Reminder createReminder(Reminder reminder) {
+        return reminderRepository.save(reminder);
     }
 
-    // READ: Retrieve all reminders for a given user's tasks
+    // READ: Get all reminders for a given user
     public List<Reminder> getRemindersByUser(Long userId) {
         return reminderRepository.findByTask_User_UserId(userId);
     }
 
-    // READ: Retrieve all pending (not completed) reminders
-    public List<Reminder> getAllPendingReminders() {
-        return reminderRepository.findByIsCompleteFalse();
-    }
-
-    // READ: Retrieve a reminder by its ID
+    // READ: Get a single reminder by its ID
     public Reminder getReminderById(Long reminderId) {
         return reminderRepository.findById(reminderId)
                 .orElseThrow(() -> new RuntimeException("Reminder not found with ID: " + reminderId));
     }
 
-    // UPDATE: Mark a reminder as complete (a specific update)
+    // UPDATE: Mark a reminder as complete
     public Reminder markReminderComplete(Long reminderId) {
         Reminder reminder = getReminderById(reminderId);
         reminder.markComplete();
         return reminderRepository.save(reminder);
     }
 
-    // UPDATE: General update for a reminder (for example, rescheduling)
-    public Reminder updateReminder(Reminder reminder) {
-        if (reminder.getReminderId() == null || !reminderRepository.existsById(reminder.getReminderId())) {
-            throw new RuntimeException("Reminder not found with ID: " + reminder.getReminderId());
-        }
-        return reminderRepository.save(reminder);
-    }
-
-    // DELETE: Delete a reminder by its ID
+    // DELETE: Remove a reminder by its ID
     public void deleteReminder(Long reminderId) {
-        if (reminderRepository.existsById(reminderId)) {
-            reminderRepository.deleteById(reminderId);
-        } else {
+        if (!reminderRepository.existsById(reminderId)) {
             throw new RuntimeException("Reminder not found with ID: " + reminderId);
         }
+        reminderRepository.deleteById(reminderId);
     }
 }

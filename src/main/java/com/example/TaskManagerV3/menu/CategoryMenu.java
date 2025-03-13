@@ -23,16 +23,14 @@ public class CategoryMenu {
             System.out.println("\n=== Manage Categories ===");
             System.out.println("1. Create Category");
             System.out.println("2. View Categories");
-            System.out.println("3. Update Category");
-            System.out.println("4. Delete Category");
-            System.out.println("5. Back to Main Menu");
+            System.out.println("3. Delete Category");
+            System.out.println("4. Back to Main Menu");
             int choice = loginMenu.getUserOption(scanner);
             switch (choice) {
                 case 1 -> createCategory(scanner);
                 case 2 -> viewCategories();
-                case 3 -> updateCategory();
-                case 4 -> deleteCategory(scanner);
-                case 5 -> inCategoryMenu = false;
+                case 3 -> deleteCategory(scanner);
+                case 4 -> inCategoryMenu = false;
                 default -> System.out.println("Invalid option!");
             }
         }
@@ -54,11 +52,6 @@ public class CategoryMenu {
             categories.forEach(c -> System.out.println("Category: " + c.getCategoryName()));
         }
     }
-
-    private void updateCategory() {
-        System.out.println("Update Category not implemented yet.");
-    }
-
 
     private void deleteCategory(Scanner scanner) {
         System.out.print("Enter category ID to delete: ");

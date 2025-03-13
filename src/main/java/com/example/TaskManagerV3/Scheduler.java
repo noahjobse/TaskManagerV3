@@ -18,17 +18,4 @@ public class Scheduler {
     public Scheduler(ReminderService reminderService) {
         this.reminderService = reminderService;
     }
-
-    @Scheduled(fixedRate = 60000)
-    @Transactional
-    public void checkDueReminders() {
-        List<Reminder> pendingReminders = reminderService.getAllPendingReminders();
-        Date now = new Date();
-        for (Reminder reminder : pendingReminders) {
-            if (now.after(reminder.getReminderDateTime())) {
-                System.out.println("Reminder Triggered for Task: " + reminder.getTask().getTaskName());
-                reminderService.markReminderComplete(reminder.getReminderId());
-            }
-        }
-    }
 }

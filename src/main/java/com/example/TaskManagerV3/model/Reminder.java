@@ -45,6 +45,10 @@ public class Reminder {
         return reminderId;
     }
 
+    public void setReminderId(Long reminderId) {
+        this.reminderId = reminderId;
+    }
+
     public Date getReminderDateTime() {
         return reminderDateTime;
     }
